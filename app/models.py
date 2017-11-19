@@ -194,32 +194,6 @@ class Req_list(models.Model):
     def __self__(self):
         return self.url
 
-class Burp(models.Model):
-    host = models.CharField('HOST', max_length=200, )
-    path = models.CharField('FILE', max_length=10000, default='/', )
-    isPost = models.IntegerField('isPost', max_length=1, )
-    postData = models.TextField('postData', )
-    filetype  = models.CharField('filetype', max_length=40, )
-    isComplete = models.IntegerField('isComplete', max_length=1, default=0, )
-    # queryed  = models.IntegerField('queryed', max_length=1, default=0,)
- 
-
-
-    class Meta:
-        db_table = 'burp'  
- 
-
-class Burpk(models.Model):
-    host = models.CharField('HOST', max_length=40, default='',  )
-    p_hash = models.CharField('p_hash', max_length=100, default='', )
-    p_id = models.IntegerField('p_id', default=0,)
-
-    class Meta:
-        db_table = 'burpk'  
-
- 
-
-
 class RequestsFlow(models.Model):
     method = models.CharField('METHOD', max_length=5, )
     host = models.CharField('HOST', max_length=40, )
@@ -243,7 +217,7 @@ class Task(models.Model):
     """
     存放一个任务的信息
    """
-    #task_id = models.CharField(max_length=128, blank=True, default='')
+    task_id = models.CharField(max_length=128, blank=True, default='')
     task_name  = models.CharField(max_length=128, blank=True, default='')
     attack_type = models.CharField(max_length=128, blank=True, default='')
     attack_target = models.CharField(max_length=256, blank=True, default='')
@@ -259,7 +233,7 @@ class Task(models.Model):
     degree_detail = models.CharField(max_length=512, blank=True, default='')
     scan_result = models.CharField(max_length=256, blank=True, default='') 
 
-    #scan_result = models.CharField(max_length=256, blank=True, default='') 
+    
     def __unicode__(self):
         return '%s %d %s %s' % (self.root_url,
          self.id,
@@ -270,8 +244,7 @@ class SubTask(models.Model):
     """
     存放一个任务的信息
    """
-    celery_task_id = models.CharField(max_length=128, blank=True, default='')
-    main_task_id  = models.CharField(max_length=128, blank=True, default='')
+    task_id = models.CharField(max_length=128, blank=True, default='')
     task_name  = models.CharField(max_length=128, blank=True, default='')
     attack_type = models.CharField(max_length=128, blank=True, default='')
     attack_target = models.CharField(max_length=256, blank=True, default='')
@@ -321,40 +294,3 @@ class PTasks_status(models.Model):
     def __unicode__(self):
         return self.domains
 
-class ResultIp(models.Model):
-    taskid = models.IntegerField(blank=True, null=True)
-    inserted = models.DateTimeField(blank=True, null=True)
-    domain = models.CharField(max_length=256, blank=True, null=True)
-    address = models.CharField(max_length=32, blank=True, null=True)
-    is_up = models.IntegerField(blank=True, null=True)
-    os = models.CharField(max_length=256, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'result_ip'
-
-
-class ResultPorts(models.Model):
-    taskid = models.IntegerField(blank=True, null=True)
-    inserted = models.DateTimeField(blank=True, null=True)
-    address = models.CharField(max_length=256, blank=True, null=True)
-    port = models.IntegerField(blank=True, null=True)
-    service = models.CharField(max_length=256, blank=True, null=True)
-    state = models.CharField(max_length=12, blank=True, null=True)
-    protocol = models.CharField(max_length=12, blank=True, null=True)
-    product = models.CharField(max_length=64, blank=True, null=True)
-    product_version = models.CharField(max_length=64, blank=True, null=True)
-    product_extrainfo = models.CharField(max_length=128, blank=True, null=True)
-    scripts_results = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'result_ports'
-
-
-class ResultDirbrute(models.Model):
-    taskid = models.IntegerField(blank=True, null=True)
-    inserted = models.DateTimeField(blank=True, null=True)
-    address = models.CharField(max_length=32, blank=True, null=True)
-    dir_results = models.TextField(blank=True, null=True)
- 

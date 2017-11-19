@@ -45,7 +45,7 @@ header_info = {
 print authenticity_token
 payload = {
     "username": "2018295280@qq.com", 
-    "password": "ruijiangmei", 
+    "password": "xxxxx", 
     "_token": authenticity_token
 }
 print payload

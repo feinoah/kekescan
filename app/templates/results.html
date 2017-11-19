@@ -78,37 +78,8 @@
                 </tr>
                 {% endfor %}
             </tbody>
- 
-     
-            {% elif results and results_type == 'nmap' %}
-           <thead>
-            <tr>
-                <th>IP:PORT</th>
-              
-                <th>Service Name</th>
-                <th>protocol</th>
-            
-                <th>product_version</th>
-                <th>State</th>
-                 
-            </tr>
-            </thead>
-            <tbody id="resulist">
-                {% for obj in results %}
-                <tr>
-                    <td>{{obj.address}}:{{ obj.port}}</td>
-                     
-                    <td>{{ obj.service}}</td>
-                    <td>{{ obj.protocol}}</td>
-                    <td>{{ obj.product}}{{ obj.product_version}}</td>
-                   
-
-                    <td><pre>{{ obj.state }}</pre></td>
-                </tr>
-                {% endfor %}
-            </tbody>
             {% endif %}  
-
+     
             <tfoot>
  
             

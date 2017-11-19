@@ -90,24 +90,3 @@ def rootUrl(urls, maxlen = '128'):
     else:
         return htmlString('<span title="%s">%s</span>' % (us[0], url))
 
-
-@register.filter
-def hasString(result, string):
-    """\xe6\xa3\x80\xe6\xb5\x8b\xe7\xbb\x93\xe6\x9e\x9c\xe4\xb8\xad\xe6\x98\xaf\xe5\x90\xa6\xe5\x90\xab\xe6\x9c\x89\xe6\x8c\x87\xe5\xae\x9a\xe5\xad\x97\xe7\xac\xa6\xe4\xb8\xb2"""
-    return result.find(string) >= 0
-
-
-@register.filter
-def httpmethod(stat):
-    """return httpmethod"""
-    #print 1000*'A',list(stat) 
-    if stat ==  0 :
-        return "GET"
-    else:
-        return "POST" 
-
-
-@register.filter
-def showhttp(rawpacket):
-    rawpacket = rawpacket.split('\r\n')
-    return '<br>'.join(rawpacket)

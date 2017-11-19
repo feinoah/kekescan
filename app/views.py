@@ -17,16 +17,11 @@ from django.http import HttpResponse as response, Http404, HttpResponseRedirect
 import json
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from bugscan.library.utils import get_poc_files
+from pocscan.library.utils import get_poc_files
 from urlparse import urlparse
 from app.lib.task_control import Task_control
 import os
 from chtscan.tasks import sql
-# get abs path 
-from app.kconfig import *
-# PYTHON_ROOT = '/home/leo/Desktop/envxlcscan/bin/python'
-# KSCAN_ROOT = '/home/leo/Desktop/xlcscan/'
-# MANAGE_ROOT = KSCAN_ROOT + 'manage.py
 
 @login_required(login_url="/login/")
 def index(request):
@@ -93,37 +88,29 @@ def task_add(request):
     )
     
     target = form.cleaned_data.get('target','') 
-    attack_type   = form.cleaned_data.get('attack_type', '')    
-    task_name   = form.cleaned_data.get('task_name', '')  
-
-    if attack_type == 'fnascan':
+    
+    #如果是单模块模式：
+    if  str(request.path).lower() == '/task/add':
+        attack_type   = form.cleaned_data.get('attack_type', '')    
+        task_name   = form.cleaned_data.get('task_name', '')  
         target = target.strip()
         target = target.strip().split('\r\n')
         if len(target)>1:
             target = ','.join(target)# fnascan 使用逗号分隔
         elif len(target)==1:
             target = target[0]
-    	# end if
+		# end if
         param = dict(form.data)
         for k in param.keys():
             param[k] = param[k][0]
-    	# end for
+		# end for
         param[u'ip_range'] = target
         param_str = json.dumps(param)
+         
         print ">>>>>>>Staring Single Module ATTACK  %s<<<<<<<" ,target
         task = Task(attack_target = target, attack_type = attack_type,task_name = task_name, status = 'WAITTING', parameter = param_str) 
         task.save()
-    if attack_type == 'add':
-        target = target.strip()
-        target = target.strip().split('\r\n')
-        if len(target)>1:
-            target = '|'.join(target)# add 使用|分隔
-        elif len(target)==1:
-            target = target[0]
-        task = Task(attack_target = target, attack_type = attack_type,task_name = task_name, status = 'WAITTING', parameter =  '') 
-        task.save()
-
-    transaction.commit()
+        transaction.commit()
         
 	# end if
     html = '<!doctype html><html><head><script>confirm("%s");  window.location = "/";</script></head><body> </html>'  
@@ -187,18 +174,13 @@ def atk_add(request):
 def subtask_queue(request):
     '''显示子任务队列中的任务''' 
     if request.method == 'GET':
-        task_id = ''
-        _main_task_id = request.GET.get('task_id')
-        if _main_task_id:
-            queues  = SubTask.objects.filter(main_task_id=_main_task_id).order_by('-add_time').values()
-            task_id = _main_task_id
-        else:
-            #queues = SubTask.objects.exclude(Q(status = 'SUCCESS') | Q(status ='FAILURE')).order_by('-add_time').values()
-            queues = SubTask.objects.order_by('-add_time').values()
+        queues = SubTask.objects.exclude(Q(status = 'SUCCESS') | Q(status ='FAILURE')).order_by('-add_time').values()
         numOfResult = len(queues)
-
+        
+        
         paginator = Paginator(queues, 10) # Shows only 10 records per page
 	# end if
+    
         page = request.GET.get('page')
         try:
             results_pag = paginator.page(page)
@@ -214,13 +196,12 @@ def subtask_queue(request):
     max_task = int(5)
     return render(
         request,
-        'subtask_queue.html',
+        'task_queue.html',
         context_instance = RequestContext(request,
         {
         "num": numOfResult,
         'task_objs': results_pag,
         'max_tasks': max_task,
-        'task_id' : task_id,
         })
     )
 # end def subtask_queue
@@ -231,9 +212,7 @@ def subtask_queue(request):
 def task_queue(request):
     '''显示队列中的任务''' 
     if request.method == 'GET':
-        #queues = Task.objects.exclude(Q(status = 'SUCCESS') | Q(status ='FAILURE')).order_by('-add_time').values()
-        queues = Task.objects.order_by('-add_time').values()
-
+        queues = Task.objects.exclude(Q(status = 'SUCCESS') | Q(status ='FAILURE')).order_by('-add_time').values()
         numOfResult = len(queues)
         
         
@@ -467,7 +446,7 @@ def results(request):
     if results_type == 'subdomain':
         if  is_valid_hostname(target):
             results = SubDomainBrute.objects.filter(Q(domain_name = target)).values()
-
+             
             
 		# end if
 	# end if
@@ -480,17 +459,7 @@ def results(request):
             #print results
         if task_id:
             results =  FnascanResult.objects.filter(Q(task_id = task_id)).values()
-
-    if results_type == 'nmap':
-        if  is_valid_ipv4_address(target):
-            results =  ResultPorts.objects.filter(Q(address = target)).values()
-        else:
-            results =  ResultPorts.objects.filter(address__contains=target).order_by('address') .values()
-            #print 100* 'A'
-            #print results
-        if task_id:
-            results =  ResultPorts.objects.filter(Q(address = task_id)).values()
-                  
+             
 		# end if
 	# end if
 # end def results
@@ -868,59 +837,23 @@ def chromeapi(request):
 ################chrome -> sqlmap############################3
 @login_required(login_url="/login/")    
 def ksettings(request):
-    pass
-    return render(
+    '''添加任务'''
+    if request.method == 'GET':
+        form = TaskAddForm()
+    else:
+        form = TaskAddForm(request.POST)
+	# end if
+    if not form.is_valid():
+        return render(
         request,
         'settings.html',
         context_instance = RequestContext(request,
         {
-              
+             'form': form ,
         })
+	# end if
     )
     
-    # if request.method == 'GET':
-    #     form = TaskAddForm()
-    # else:
-    #     form = TaskAddForm(request.POST)
-    # #start stop flower
-    # flower_process = ''
-    # if  str(request.path).lower() == "/settings/flower/start":  
-    #     #xmanage celery   flower --broker=redis://localho:6379/0
-    #     print '##############start flower'
-    #     import subprocess
-    #     import psutil
-    #     from subprocess import PIPE
-    #     flower_process = psutil.Popen(["/home/leo/Desktop/envxlcscan/bin/python",'/home/leo/Desktop/xlcscan/manage.py','celery','flower',"--broker=redis://localhost:6379/0"],stdout=PIPE)
-
-    #     return render(
-    #     request,
-    #     'settings.html',
-    #     context_instance = RequestContext(request,
-    #     {
-    #          'form': form ,
-    #     })
-    #     )
-
-    # if  str(request.path).lower() == "/settings/flower/stop":  
-    #     print '##############kill flower'
-    #     try:
-    #         flower_process.kill()
-    #     except:
-    #         pass
-    
-    # #start stop local worker
-    # worker_process = ''
-    # if  str(request.path).lower() == "/settings/localworker/start":  
-    #     print '##############start flower'
-    #     import subprocess
-    #     import psutil
-    #     from subprocess import PIPE
-    #     worker_process = psutil.Popen(["/home/leo/Desktop/envxlcscan/bin/python",'/home/leo/Desktop/xlcscan/manage.py','celery','worker',"--loglevel=info"],stdout=PIPE)
-
-    # if  str(request.path).lower() == "/settings/localworker/stop":  
-    #     print 'kill xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-
-
     
 # end def ksettings
 @login_required(login_url="/login/")
@@ -984,149 +917,3 @@ def http_flow(request):
         })
     )
 # end def http_flow
-
-
-from lib.burpflowlib import distinct_http
-@login_required(login_url="/login/") 
-def burpflow(request):
-    if request.method == 'GET':
-        #Show Single http packet
-        http_id = request.GET.get('id')
-        if http_id:
-            results_pag = Burp.objects.get(id = http_id)
-            return render(
-                request,
-                'http_raw.html',
-                context_instance = RequestContext(request,
-                {
-  
-                'burp_flow':results_pag,
-                })
-            )
-
-        #Httpflow after distinct
-        if  "/burpflow/distinct/" in str(request.path).lower():
-            distinct_http()
-            #call disinct .py
-            test_ids = list(Burpk.objects.all().values_list('p_id', flat=True))
-            #print test_ids
-            burp_flow_list = Burp.objects.filter(id__in=test_ids).order_by('-id').values()
-        #Httpflow 
-        else:
-            burp_flow_list = Burp.objects.filter().order_by('-id').values()
-        numOfResult = len(burp_flow_list)
-        
-        
-        paginator = Paginator(burp_flow_list, 20) # Shows only 10 records per page
-    # end if
-    
-        page = request.GET.get('page')
-        try:
-            results_pag = paginator.page(page)
-        except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-            results_pag = paginator.page(1)
-        except EmptyPage:
-        # If page is out of range (e.g. 7777), deliver last page of results.
-            results_pag = paginator.page(paginator.num_pages)
-
-    return render(
-        request,
-        'burp_flow.html',
-        context_instance = RequestContext(request,
-        {
-        'num' : numOfResult,
-        'burp_flow':results_pag,
-        })
-    )
-
-
-
-job_workspace =   KSCAN_ROOT + '/app/'
-from tempfile import mkstemp
-from os import fdopen,unlink,kill
-from subprocess import Popen
-import signal
-from django.http import HttpResponse
-from django.core import serializers
-import psutil
-def startjob(request):
-    request.session.modified = True
-    """Start a new long running process unless already started."""
-    if not request.session.has_key('running_job'):
-        request.session['running_job'] = {}
-
-    job_name = request.GET.get('job_name')
-    # print request.session['running_job']
-    #
-    if job_name  not in request.session['running_job']:
-        job_execfile = ''
-
-        if job_name == 'flower':
-            job_execfile = PYTHON_ROOT + " " + MANAGE_ROOT + "  celery flower --broker=redis://localhost:6379/0"
-            
-
-        if job_name == 'localworker':
-            job_execfile = PYTHON_ROOT +  " " + MANAGE_ROOT + "  celery worker --loglevel=info "
-        
-        print job_execfile
-        if job_execfile:   
-            # create a temporary file to save the results
-            outfd,outname=mkstemp()
-            # request.session['jobfile']=outname
-            outfile=fdopen(outfd,'a+')
-            # print job_workspace
-            proc=Popen(job_execfile.split(),shell=False,stdout=outfile,cwd=job_workspace)
-            # remember pid to terminate the job later
-            request.session['running_job'][job_name]=proc.pid
-            # remember tempfile to delete the job later
-            request.session['running_job'][job_name+'_tmpfile']=outname
-
-    return JsonResponse(request.session['running_job'], safe=False) 
-
-def showjob(request):
-    """Show the last result of the running job."""
-    # print request.session
-    if not  request.session.has_key('running_job'):
-        RUNNING_JOB_DIC = {}
-        return JsonResponse(RUNNING_JOB_DIC, safe=False) 
-    else:
-        RUNNING_JOB_DIC = request.session['running_job']
-        return JsonResponse(RUNNING_JOB_DIC, safe=False) 
-
-def rmjob(request):
-    """Terminate the runining job."""
-    request.session.modified = True
-    if request.session.has_key('running_job'):
-        job_name = request.GET.get('job_name')
-        
-        #mutilprocess
-        if job_name == 'localworker':
-            proc=Popen('pkill -f "celery worker"',shell=True,stdout=False)
-
-        #if the job in running dict()
-        if request.session['running_job'].has_key(job_name):
-            jobpid =  request.session['running_job'][job_name]
-            filename = request.session['running_job'][job_name + '_tmpfile']
-            #print jobpid,filename
-            # if the job has finished already
-            if not psutil.pid_exists(jobpid):
-                # make sure running_job dictionary   has delete
-                #try:
-                del request.session['running_job'][job_name]
-
-                del request.session['running_job'][job_name + '_tmpfile']
-                #print  request.session['running_job'] 
-                return JsonResponse(request.session['running_job'], safe=False) 
-            try:
-                #print  jobpid,filename
-                kill(jobpid,signal.SIGKILL) # unix only
-                unlink(filename)
-            except OSError, e:
-                # probably the job has finished already
-                return JsonResponse({'error':'kill pid or unlink tmpfile error!'})
-
-            del request.session['running_job'][job_name]
-            del request.session['running_job'][job_name + '_tmpfile']
-
-    return JsonResponse(request.session['running_job'], safe=False) 

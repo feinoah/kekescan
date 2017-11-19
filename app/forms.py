@@ -39,9 +39,7 @@ class TaskAddForm(Form):
     choices=[('fnascan', _('F-NAScan')),
              ('subdomainbrute', _('subDomainBrute')),
              ('bugscan', _('Bugscan')),
-             ('nmap', _("Nmap-Default")),
-            # ('pocscan', _("PocScan")),
-             ('add', _("add")),])
+             ('pocscan', _("PocScan")),])
              
     attack_route = ChoiceField(label=u'attack_type',required=False, widget=forms.Select(attrs={'class':'form-control'}),initial='F-NAScan',
     choices=[('K0', _('DOMAIN -> SUBDOMAIN -> IPSERVICE')),
@@ -91,8 +89,6 @@ class ResultsForm(Form):
     choices=[('icp_check', _('ICP CHECK')),
              ('subdomain', _("SubDomain")),
               ('task_id', _("Task Id")),
-              ('nmap', _("Nmap-Default")),
-              ('dirbrute', _("DirBrute")),
              ('SubDomain/PortService', _("SubDomain -> PortService")),
              ('an ', _("SubDomain -> CRange -> PortService")),
              ('fnascan', _("F-Nascan")),

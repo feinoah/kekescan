@@ -1,4 +1,4 @@
-{% load xfilter %}
+ 
 <div class="nav-side-menu">
            <a class="navbar-brand" href="/" title="Pocscan">
           <img src="/static/images/logo.png"
@@ -9,30 +9,25 @@
         <div class="menu-list">
   
             <ul id="menu-content" class="menu-content collapse out">
-           <li> </li> 
-                <!--<li>
+                <li>
                   <a href="/">
                   <i class="fa fa-dashboard fa-lg"></i> <strong>Dashboard</strong>
                   </a>
-                </li>  -->
+                </li>
                 
-                 <!--<li>
+                 <li>
                   <a href="{% url 'task_add' %}">
                   <i class="fa fa-edit fa-lg"></i><strong> 添加任务</strong>
                   </a>
-                  </li> -->
+                  </li>
 
                 <li  data-toggle="collapse" data-target="#tasks" class="collapsed active">
                   <a href="#"><i class="fa fa-tasks fa-lg"></i> <strong> 任务管理 </strong><span class="arrow"></span></a>
                 </li>
                 <ul class="sub-menu collapse" id="tasks">
-                    <li class="active"><a href="{% url 'task_add' %}"> <strong>添加任务</strong></a></li>
-                    <li ><a href="{% url 'task_queue' %}"><strong> 主任务队列 </strong></a></li>
+                    <li class="active"><a href="{% url 'task_queue' %}"><strong> 主任务队列 </strong></a></li>
                     <li><a href="{% url 'subtask_queue' %}"> <strong>子任务队列</strong></a></li>
-
-                   <!-- <li><a href="http://127.0.0.1:5555/tasks"> <strong>flower任务队列</strong></a></li>
-                    <li><a href="http://127.0.0.1:5555/tasks"> <strong>workers</strong></a></li>
-                    <li><a href="{% url 'task_history' %}"> <strong>任务历史</strong></a></li> -->
+                    <li><a href="{% url 'task_history' %}"> <strong>任务历史</strong></a></li> 
                 </ul>
 
 
@@ -50,9 +45,8 @@
                   <a href="#"><i class="fa fa-coffee fa-lg"></i> <strong> 插件管理</strong> <span class="arrow"></span></a>
                 </li>  
                 <ul class="sub-menu collapse" id="plugins">
-                    <li><a href="{% url 'poc_list' %}"> <strong>插件列表</strong></a></li>
-
-                    <!--<li><a href="{% url 'poc_list' %}"> <strong>beebeto</strong></a></li> -->
+                    <li><a href="{% url 'poc_list' %}"> <strong>bugscan</strong></a></li>
+                    <li><a href="{% url 'poc_list' %}"> <strong>beebeto</strong></a></li> 
                 </ul>
                 
   
@@ -60,7 +54,7 @@
                   <a href="#"><i class="fa fa-chain  fa-lg"></i>  <strong>代理流量</strong> <span class="arrow"></span></a>
                 </li>  
                 <ul class="sub-menu collapse" id="proxy">
-                    <li><a href="{% url 'burpflow' %}"> <strong>from BURP</strong></a></li>
+                    <li><a href="{% url 'settings' %}"> <strong>from BURP</strong></a></li>
                     <li><a href="{% url 'login' %}"> <strong>from Chrome</strong></a></li> 
                 </ul>
 

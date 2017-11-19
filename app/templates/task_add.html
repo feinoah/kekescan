@@ -12,7 +12,7 @@
       <div class="container-fluid">
         <h1 class="bread-crumb">
           <strong>
-            <a href="/task/add">TASKADD</a> / <a href="/task/queue">主任务队列</a> / <a href="/subtask/queue">子任务队列</a>
+            漏洞检测 / 添加扫描
           </strong>
         </h1>
         
@@ -55,7 +55,7 @@
           {% if request.path ==  '/task/add' %}   
           <div class="form-group form-group-sm">
             <label class="col-xs-2 control-label">
-              扫描类型
+              检测模块
             </label>
             <div class="col-xs-8 form-inline">
               {{ form.attack_type }}

@@ -14,7 +14,7 @@ import gevent
 from gevent.pool import Pool
 from app.lib.utils import *
 from app.lib.crawler import MyCrawler, similarity
-from bugscan.poc_launcher import Poc_Launcher
+from pocscan.poc_launcher import Poc_Launcher
 from celery import task
 from app.models import Req_list
 from urlparse import urlparse
@@ -33,10 +33,8 @@ platforms.C_FORCE_ROOT = True
 # 修改celery的全局配置
 celery_app.conf.update(
     CELERY_IMPORTS = ("app.tasks", ),
-    #BROKER_URL = 'redis://:ruijiangmei@115.28.72.96:6379/1',
-    #CELERY_RESULT_BACKEND = 'redis://:ruijiangmei@115.28.72.96:6379/1',
-    BROKER_URL = 'redis://localhost:6379/0',
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0',
+    BROKER_URL = 'redis://:xxxxx@115.28.72.96:6379/1',
+    CELERY_RESULT_BACKEND = 'redis://:xxxxx@115.28.72.96:6379/1',
     #CELERY_RESULT_BACKEND = 'db+mysql://root:wenjunnengyoujiduochou@127.0.0.1:3306/xlcscan',
     CELERY_TASK_SERIALIZER='json',
     CELERY_RESULT_SERIALIZER='json',
@@ -55,24 +53,24 @@ def run_fnascan(target):
     fnascan_workspace =   path.join(TASKS_ROOT, 'tools','FNAScan').replace('\\', '/')
     #"D:/Projects/xlcscan/xlcscan/tools/FNAScan/"
     #print fnascan_workspace
-    cmd = 'python F-NAScan.kscan.py -h %s' % target #221.226.15.243-221.226.15.245 , 221.226.15.243,221.226.15.245
+    cmd = 'F-NAScan.kscan.py -h %s' % target #221.226.15.243-221.226.15.245 , 221.226.15.243,221.226.15.245
     p=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT ,cwd=fnascan_workspace,)  
     process_output = p.stdout.readlines()
     return process_output   
 
-# @celery_app.task(time_limit=3600)
-# def run_bugscan(url_list):     
-#     from tools.pocs.bugscan import Bugscan
-#     PLUGINS_DIR = 'D:\\Projects\\xlcscan\\tools\\pocs\\'
-#     poc = Bugscan()
-#     pool = Pool(100)
-#     for target in url_list: 
-#         for poc_file in bugscan_name_list:
-#             if target and poc_file:
-#                 target = fix_target(target)
-#                 poc_file = PLUGINS_DIR + 'bugscan' + '\\' + poc_file
-#                 pool.add(gevent.spawn(poc.run, target,poc_file))
-#     pool.join()
+@celery_app.task(time_limit=3600)
+def run_bugscan(url_list):     
+    from tools.pocs.bugscan import Bugscan
+    PLUGINS_DIR = 'D:\\Projects\\xlcscan\\tools\\pocs\\'
+    poc = Bugscan()
+    pool = Pool(100)
+    for target in url_list: 
+        for poc_file in bugscan_name_list:
+            if target and poc_file:
+                target = fix_target(target)
+                poc_file = PLUGINS_DIR + 'bugscan' + '\\' + poc_file
+                pool.add(gevent.spawn(poc.run, target,poc_file))
+    pool.join()
 
     
 @celery_app.task(time_limit=3600)
@@ -127,11 +125,10 @@ def crawler(target, cookie, ua):
         pass
     return result
 
-import time   
+    
 @celery_app.task(time_limit=3600)
 def add(s):
     s = s.split(',')
     #print x * y
-    time.sleep(10)
     return s[0] + s[1] 
     

@@ -1,0 +1,3 @@
+www.hongtatimes.com.cn        	61.166.25.132
+phys.hongtatimes.com.cn       	202.102.110.203
+vfs.hongtatimes.com.cn        	202.102.110.203
